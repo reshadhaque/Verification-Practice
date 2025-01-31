@@ -1,40 +1,48 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 11/19/2024 08:36:03 AM
-// Design Name: 
-// Module Name: tb
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-//`include "uvm_macros.svh"
-//import uvm_pkg::*;
 
-class first;
+
+`include "uvm_macros.svh";
+import uvm_pkg::*;
+
+class parent extends uvm_object;
+
+
+    function new(string path = "parent");
+           super.new(path);
+    endfunction
     
-    rand bit [3:0] data;
+    rand bit [4:0] data;
+    
+    `uvm_object_utils_begin(parent)
+         `uvm_field_int(data, UVM_DEFAULT);
+    `uvm_object_utils_end
+    
+endclass
 
+class child extends uvm_object;
+    
+    parent p;
+    
+    function new(string path = "child");
+        super.new(path);
+        p = new("parent");
+    endfunction
+    
+    `uvm_object_utils_begin(child)
+    `uvm_field_object(p, UVM_DEFAULT);
+    `uvm_object_utils_end
+    
 endclass
 
 module tb;
-    first f;
-    initial
-    begin
+
+    child c;
     
-    f = new();
-    f.randomize();
-    $display("Value of Data: %0d", f.data);
+    initial begin
+        c = new("child");
+        c.randomize();
+        c.print();
     end
-  
+    
 endmodule
