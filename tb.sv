@@ -5,57 +5,44 @@
 `include "uvm_macros.svh";
 import uvm_pkg::*;
 
-class array extends uvm_object;
+class first extends uvm_object;
+    rand bit[4:0] data;
     
-    //static array
-    int arr1[3] = {1,2,3};
-    
-    //dynamic array
-    int arr2[];
-    
-    //Queue
-    int arr3[$];
-    
-    //Associative Array
-    int arr4[int];
-    
-    function new(string path = "array");
+    function new(string path = "first");
         super.new(path);
     endfunction
     
-    `uvm_object_utils_begin(array);
-        `uvm_field_sarray_int(arr1, UVM_DEFAULT);
-        `uvm_field_array_int(arr2, UVM_DEFAULT);
-        `uvm_field_queue_int(arr3, UVM_DEFAULT);
-        `uvm_field_aa_int_int(arr4, UVM_DEFAULT);
+    `uvm_object_utils_begin(first)
+    `uvm_field_int(data, UVM_DEFAULT);
     `uvm_object_utils_end
-    
-    task run();
-        arr2 = new[3];
-        arr2[0] = 1;
-        arr2[1] = 2;
-        arr2[2] = 3;
-        
-        arr3.push_front(1);
-        arr3.push_front(2);
-        arr3.push_front(3);
-        
-        arr4[1] = 3;
-        arr4[2] = 4;
-        arr4[3] = 5;
-        
-    endtask
+endclass
 
+class second extends uvm_object;
+    first f;
+    
+    function new(string path = "second");
+        super.new(path);
+        f = new("first");
+    endfunction
+    
+    `uvm_object_utils_begin(second)
+     `uvm_field_object(f, UVM_DEFAULT);
+    `uvm_object_utils_end
 endclass
 
 module tb;
-
-    array arrs;
+    
+    second s1;
+    second s2;
     
     initial begin
-        arrs = new("array");
-        arrs.run();
-        arrs.print();
+        s1 = new("s1");
+        //s2 = new("s2");
+        s1.f.randomize();
+        $cast(s2, s1.clone());
+        s1.f.data = 8;
+        s1.print();
+        s2.print();
     end
     
 endmodule
