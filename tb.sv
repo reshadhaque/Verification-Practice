@@ -1,48 +1,58 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-
 
 `include "uvm_macros.svh";
 import uvm_pkg::*;
 
-class first extends uvm_object;
-    rand bit[4:0] data;
+
+class a extends uvm_component;
+    `uvm_component_utils(a);
     
-    function new(string path = "first");
-        super.new(path);
+    function new(string path = "a", uvm_component parent = null);
+        super.new(path, parent);
     endfunction
     
-    `uvm_object_utils_begin(first)
-    `uvm_field_int(data, UVM_DEFAULT);
-    `uvm_object_utils_end
+    virtual function void build_phase(uvm_phase phase);
+        super.build_phase(phase);
+        `uvm_info("a", "class a executed", UVM_NONE);
+    endfunction;
+    
 endclass
 
-class second extends uvm_object;
-    first f;
+class b extends uvm_component;
+    `uvm_component_utils(b)
     
-    function new(string path = "second");
-        super.new(path);
-        f = new("first");
+    function new(string path = "b", uvm_component parent = null);
+        super.new(path, parent);
+    endfunction;
+    
+    virtual function void build_phase(uvm_phase phase);
+        super.build_phase(phase);
+        `uvm_info("b", "class b executed", UVM_NONE);
+    endfunction
+endclass
+
+class c extends uvm_component;
+    `uvm_component_utils(c)
+    a a_inst;
+    b b_inst;
+    
+    function new(string path = "c", uvm_component parent = null);
+        super.new(path, parent);
+        a_inst = a::type_id::create("a_inst", this);
+        b_inst = b::type_id::create("b_inst", this);
     endfunction
     
-    `uvm_object_utils_begin(second)
-     `uvm_field_object(f, UVM_DEFAULT);
-    `uvm_object_utils_end
+    virtual function void build_phase(uvm_phase phase);
+        super.build_phase(phase);
+    endfunction
+
 endclass
+
 
 module tb;
     
-    second s1;
-    second s2;
-    
     initial begin
-        s1 = new("s1");
-        //s2 = new("s2");
-        s1.f.randomize();
-        $cast(s2, s1.clone());
-        s1.f.data = 8;
-        s1.print();
-        s2.print();
+       run_test("c");
     end
     
 endmodule
