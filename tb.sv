@@ -27,6 +27,7 @@ endclass
 class test extends uvm_test;
     `uvm_component_utils(test)
     env e;
+    //nigga
     
     function new(string path = "test", uvm_component parent = null);
         super.new(path, parent);
