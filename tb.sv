@@ -4,55 +4,49 @@
 import uvm_pkg::*;
 
 
-class a extends uvm_component;
-    `uvm_component_utils(a);
+class env extends uvm_env;
+    `uvm_component_utils(env);
     
-    function new(string path = "a", uvm_component parent = null);
+    int data;
+    
+    function new(string path = "env", uvm_component parent = null);
+        super.new(path,parent);
+    endfunction
+    
+    virtual function void build_phase(uvm_phase phase);
+        super.build_phase(phase);
+        
+        if(uvm_config_db#(int)::get(null, "uvm_test_top", "data", data))
+            `uvm_info("ENV", $sformatf("Value of data %0d", data), UVM_NONE)
+        else
+            `uvm_error("ENV", "Unable to access value");
+    endfunction
+
+endclass
+
+class test extends uvm_test;
+    `uvm_component_utils(test)
+    env e;
+    
+    function new(string path = "test", uvm_component parent = null);
         super.new(path, parent);
     endfunction
     
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        `uvm_info("a", "class a executed", UVM_NONE);
-    endfunction;
+        e = env::type_id::create("e", this);
+        uvm_config_db#(int)::set(null, "uvm_test_top", "data", 6);
+    endfunction
     
 endclass
 
-class b extends uvm_component;
-    `uvm_component_utils(b)
-    
-    function new(string path = "b", uvm_component parent = null);
-        super.new(path, parent);
-    endfunction;
-    
-    virtual function void build_phase(uvm_phase phase);
-        super.build_phase(phase);
-        `uvm_info("b", "class b executed", UVM_NONE);
-    endfunction
-endclass
 
-class c extends uvm_component;
-    `uvm_component_utils(c)
-    a a_inst;
-    b b_inst;
-    
-    function new(string path = "c", uvm_component parent = null);
-        super.new(path, parent);
-        a_inst = a::type_id::create("a_inst", this);
-        b_inst = b::type_id::create("b_inst", this);
-    endfunction
-    
-    virtual function void build_phase(uvm_phase phase);
-        super.build_phase(phase);
-    endfunction
-
-endclass
 
 
 module tb;
     
     initial begin
-       run_test("c");
+       run_test("test");
     end
     
 endmodule
